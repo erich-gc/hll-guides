@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Hell Let Loose Seeding Maps</title>
+
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="referrer" content="no-referrer">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      background: #111;
+    }
+
+    .leaflet-popup-content {
+      width: 320px;
+    }
+
+    .popup-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .popup-img {
+      width: 100%;
+      border-radius: 4px;
+      display: block;
+    }
+
+    .popup-note {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #ddd;
+    }
+
+    .control-panel {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 999;
+      background: rgba(20, 20, 20, 0.9);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      min-width: 180px;
+    }
+
+    .control-panel label {
+      display: block;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    .control-panel select {
+      width: 100%;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      padding: 4px;
+      background: #222;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 4px;
+    }
+
+    .home-link {
+      position: absolute;
+      top: 12px;
+      left: 50px;
+      z-index: 999;
+      background: rgba(20, 20, 20, 0.9);
+      color: white;
+      padding: 8px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .home-link:hover {
+      background: rgba(45, 45, 45, 0.95);
+    }
+  </style>
+</head>
+
+<body>
+
+<a class="home-link" href="../">HLL Home</a>
+
+<div id="map"></div>
+
+<div class="control-panel">
+  <label>
+    Map
+    <select id="mapSelect"></select>
+  </label>
+
+  <label>
+    <input type="checkbox" id="showBlue" checked>
+    Show Blue Team
+  </label>
+
+  <label>
+    <input type="checkbox" id="showRed" checked>
+    Show Red Team
+  </label>
+
+  <label>
+    <input type="checkbox" id="showGarrisons" checked>
+    Show Garrisons
+  </label>
+
+  <label>
+    <input type="checkbox" id="showOps" checked>
+    Show OPs
+  </label>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  const map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -2,
+    maxZoom: 3,
+    zoomControl: true
+  });
+
+  const GARRISON_ICON_SIZE = 32;
+  const OP_ICON_SIZE = 28;
+
+  const icons = {
+    blueGarrison: L.icon({
+      iconUrl: 'icons/garrison-blue.png',
+      iconSize: [GARRISON_ICON_SIZE, GARRISON_ICON_SIZE],
+      iconAnchor: [GARRISON_ICON_SIZE / 2, GARRISON_ICON_SIZE / 2],
+      popupAnchor: [0, -(GARRISON_ICON_SIZE / 2)]
+    }),
+
+    redGarrison: L.icon({
+      iconUrl: 'icons/garrison-red.png',
+      iconSize: [GARRISON_ICON_SIZE, GARRISON_ICON_SIZE],
+      iconAnchor: [GARRISON_ICON_SIZE / 2, GARRISON_ICON_SIZE / 2],
+      popupAnchor: [0, -(GARRISON_ICON_SIZE / 2)]
+    }),
+
+    blueOp: L.icon({
+      iconUrl: 'icons/op-blue.png',
+      iconSize: [OP_ICON_SIZE, OP_ICON_SIZE],
+      iconAnchor: [OP_ICON_SIZE / 2, OP_ICON_SIZE / 2],
+      popupAnchor: [0, -(OP_ICON_SIZE / 2)]
+    }),
+
+    redOp: L.icon({
+      iconUrl: 'icons/op-red.png',
+      iconSize: [OP_ICON_SIZE, OP_ICON_SIZE],
+      iconAnchor: [OP_ICON_SIZE / 2, OP_ICON_SIZE / 2],
+      popupAnchor: [0, -(OP_ICON_SIZE / 2)]
+    })
+  };
+
+  const mapConfigs = {
+    carentan: {
+      name: 'Carentan',
+      image: 'maps/carentan.png',
+      width: 1920,
+      height: 1920,
+      markers: [
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies Middle Garrison',
+          x: 733,
+          y: 926,
+          image: 'screenshots/carentan/carentan_allies_middle.png',
+          note: 'Up against the wall in the backyard.'
+        },
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies North Garrison',
+          x: 733,
+          y: 1122,
+          image: 'screenshots/carentan/carentan_allies_north.png',
+          note: 'Up against the wall inside the bush.'
+        },
+        {
+          team: 'blue',
+          type: 'op',
+          name: 'Allies Outpost',
+          x: 757,
+          y: 1022,
+          image: 'screenshots/carentan/carentan_allies_outpost.png',
+          note: 'Up against the wall inside the bush.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis South Garrison',
+          x: 1192,
+          y: 803,
+          image: 'screenshots/carentan/carentan_axis_south.png',
+          note: 'In between the crates and the wall.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis Middle Garrison',
+          x: 1203,
+          y: 996,
+          image: 'screenshots/carentan/carentan_axis_middle.png',
+          note: 'Up against the wall in the backyard.'
+        },
+        {
+          team: 'red',
+          type: 'op',
+          name: 'Axis Outpost',
+          x: 1162,
+          y: 884,
+          image: 'screenshots/carentan/carentan_axis_outpost.png',
+          note: 'Up against the buildings in the corner.'
+        }
+      ]
+    },
+
+    stMereEglise: {
+      name: 'St. Mere Eglise',
+      image: 'maps/st-mere-eglise.png',
+      width: 1920,
+      height: 1920,
+      markers: [
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies South Garrison',
+          x: 1205,
+          y: 1269,
+          image: 'screenshots/sme/sme_allies_south.png',
+          note: 'At the edge, inside the wheat field.'
+        },
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies Middle Garrison',
+          x: 1220,
+          y: 1464,
+          image: 'screenshots/sme/sme_allies_middle.png',
+          note: 'Up against the wall.'
+        },
+        {
+          team: 'blue',
+          type: 'op',
+          name: 'Allies Outpost',
+          x: 1182,
+          y: 1391,
+          image: 'screenshots/sme/sme_allies_outpost.png',
+          note: 'In the wheat field.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis Middle Garrison',
+          x: 703,
+          y: 1342,
+          image: 'screenshots/sme/sme_axis_middle.png',
+          note: 'Up against the hedge.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis North Garrison',
+          x: 754,
+          y: 1533,
+          image: 'screenshots/sme/sme_axis_middle.png',
+          note: 'Inside the bush at map border.'
+        },
+        {
+          team: 'red',
+          type: 'op',
+          name: 'Axis Outpost',
+          x: 749,
+          y: 1432,
+          image: 'screenshots/sme/sme_axis_outpost.png',
+          note: 'In the bush.'
+        }
+      ]
+    },
+
+    stMarieduMont: {
+      name: 'St. Marie du Mont',
+      image: 'maps/sainte-marie-du-mont.png',
+      width: 1920,
+      height: 1920,
+      markers: [
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies Middle Garrison',
+          x: 1000,
+          y: 1225,
+          image: 'screenshots/smd/smd_allies_middle.png',
+          note: 'Up against the hedgerow.'
+        },
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies East Garrison',
+          x: 1202,
+          y: 1183,
+          image: 'screenshots/smd/smd_allies_east.png',
+          note: 'In the wheat field.'
+        },
+        {
+          team: 'blue',
+          type: 'op',
+          name: 'Allies Outpost',
+          x: 1096,
+          y: 1171,
+          image: 'screenshots/smd/smd_allies_outpost.png',
+          note: 'In the wheat field.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis Middle Garrison',
+          x: 936,
+          y: 709,
+          image: 'screenshots/smd/smd_axis_middle.png',
+          note: 'Up against the hedgerow.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis East Garrison',
+          x: 1149,
+          y: 721,
+          image: 'screenshots/smd/smd_axis_east.png',
+          note: 'Up against the bulding/sandbags.'
+        },
+        {
+          team: 'red',
+          type: 'op',
+          name: 'Axis Outpost',
+          x: 1007,
+          y: 727,
+          image: 'screenshots/smd/smd_axis_outpost.png',
+          note: 'In the wheat field.'
+        }
+      ]
+    },
+
+    omaha: {
+      name: 'Omaha Beach',
+      image: 'maps/omaha.png',
+      width: 1920,
+      height: 1920,
+      markers: [
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies Middle Garrison',
+          x: 1182,
+          y: 938,
+          image: 'screenshots/omaha/omaha_allies_middle.png',
+          note: 'Up against the wall in the backyard.'
+        },
+        {
+          team: 'blue',
+          type: 'garrison',
+          name: 'Allies North Garrison',
+          x: 1206,
+          y: 1139,
+          image: 'screenshots/omaha/omaha_allies_north.png',
+          note: 'Up against the wall in the backyard.'
+        },
+        {
+          team: 'blue',
+          type: 'op',
+          name: 'Allies Outpost',
+          x: 1159,
+          y: 961,
+          image: 'screenshots/omaha/omaha_allies_outpost.png',
+          note: 'In the bush.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis Middle Garrison',
+          x: 699,
+          y: 903,
+          image: 'screenshots/omaha/omaha_axis_middle.png',
+          note: 'Up against the wall.'
+        },
+        {
+          team: 'red',
+          type: 'garrison',
+          name: 'Axis North Garrison',
+          x: 767,
+          y: 1086,
+          image: 'screenshots/omaha/omaha_axis_north.png',
+          note: 'Directly behind the greenhouse.'
+        },
+        {
+          team: 'red',
+          type: 'op',
+          name: 'Axis Outpost',
+          x: 742,
+          y: 918,
+          image: 'screenshots/omaha/omaha_axis_outpost.png',
+          note: 'Inside the trench.'
+        }
+      ]
+    }
+  };
+
+  let currentImageLayer = null;
+  let currentMapKey = null;
+  const markerLayers = [];
+
+  function getIcon(markerData) {
+    if (markerData.team === 'blue' && markerData.type === 'garrison') {
+      return icons.blueGarrison;
+    }
+
+    if (markerData.team === 'red' && markerData.type === 'garrison') {
+      return icons.redGarrison;
+    }
+
+    if (markerData.team === 'blue' && markerData.type === 'op') {
+      return icons.blueOp;
+    }
+
+    if (markerData.team === 'red' && markerData.type === 'op') {
+      return icons.redOp;
+    }
+  }
+
+  function createPopup(markerData) {
+    return `
+      <div class="popup-title">${markerData.name}</div>
+      <img class="popup-img" src="${markerData.image}" alt="${markerData.name}">
+      <div class="popup-note">${markerData.note || ''}</div>
+    `;
+  }
+
+  function clearMarkers() {
+    markerLayers.forEach(marker => {
+      map.removeLayer(marker);
+    });
+
+    markerLayers.length = 0;
+  }
+
+  function addMarkersForMap(mapKey) {
+    const selectedMap = mapConfigs[mapKey];
+
+    selectedMap.markers.forEach(data => {
+      const marker = L.marker([data.y, data.x], {
+        icon: getIcon(data)
+      }).bindPopup(createPopup(data));
+
+      marker.data = data;
+      marker.addTo(map);
+      markerLayers.push(marker);
+    });
+
+    applyFilters();
+  }
+
+  function loadMap(mapKey) {
+    const selectedMap = mapConfigs[mapKey];
+
+    currentMapKey = mapKey;
+
+    map.closePopup();
+
+    clearMarkers();
+
+    if (currentImageLayer) {
+      map.removeLayer(currentImageLayer);
+    }
+
+    const bounds = [
+      [0, 0],
+      [selectedMap.height, selectedMap.width]
+    ];
+
+    currentImageLayer = L.imageOverlay(selectedMap.image, bounds).addTo(map);
+
+    map.fitBounds(bounds);
+
+    addMarkersForMap(mapKey);
+  }
+
+  function applyFilters() {
+    const showBlue = document.getElementById('showBlue').checked;
+    const showRed = document.getElementById('showRed').checked;
+    const showGarrisons = document.getElementById('showGarrisons').checked;
+    const showOps = document.getElementById('showOps').checked;
+
+    markerLayers.forEach(marker => {
+      const data = marker.data;
+
+      let visible = true;
+
+      if (data.team === 'blue' && !showBlue) visible = false;
+      if (data.team === 'red' && !showRed) visible = false;
+      if (data.type === 'garrison' && !showGarrisons) visible = false;
+      if (data.type === 'op' && !showOps) visible = false;
+
+      if (visible) {
+        marker.addTo(map);
+      } else {
+        map.removeLayer(marker);
+      }
+    });
+  }
+
+  function populateMapSelect() {
+    const mapSelect = document.getElementById('mapSelect');
+
+    Object.keys(mapConfigs).forEach(mapKey => {
+      const option = document.createElement('option');
+      option.value = mapKey;
+      option.textContent = mapConfigs[mapKey].name;
+      mapSelect.appendChild(option);
+    });
+
+    mapSelect.addEventListener('change', function() {
+      loadMap(this.value);
+    });
+  }
+
+  document.getElementById('showBlue').addEventListener('change', applyFilters);
+  document.getElementById('showRed').addEventListener('change', applyFilters);
+  document.getElementById('showGarrisons').addEventListener('change', applyFilters);
+  document.getElementById('showOps').addEventListener('change', applyFilters);
+
+  populateMapSelect();
+
+    // Default map loaded when the page opens.
+  loadMap('carentan');
+
+    // Click to get the x/y coordinate.
+  ///*
+  map.on('click', function(e) {
+    const y = Math.round(e.latlng.lat);
+    const x = Math.round(e.latlng.lng);
+
+    console.log(`Map: ${currentMapKey}, x: ${x}, y: ${y}`);
+
+    alert(`Map: ${currentMapKey}\nMarker coordinate:\nx: ${x}\ny: ${y}`);
+  });
+  //*/
+</script>
+
+</body>
+</html>
