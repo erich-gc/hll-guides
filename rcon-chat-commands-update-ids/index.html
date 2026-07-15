@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RCON Chat Commands Update IDs | Hell Let Loose Guides by Erich</title>
+
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="referrer" content="no-referrer">
+
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #181818;
+      border-bottom: 1px solid #333;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      color: #bbb;
+      font-size: 16px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: #d6d6d6;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    main {
+      width: min(1200px, calc(100% - 40px));
+      margin: 36px auto 48px;
+      flex: 1;
+    }
+
+    .intro {
+      background: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .intro h2 {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+
+    .intro p {
+      margin: 8px 0;
+      color: #bbb;
+      line-height: 1.5;
+    }
+
+    .privacy-note {
+      color: #91c995 !important;
+      font-size: 14px;
+    }
+
+    .panel {
+      background: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 21px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #ddd;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .help-text {
+      margin: 0 0 12px;
+      color: #aaa;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    textarea {
+      width: 100%;
+      display: block;
+      resize: vertical;
+      border: 1px solid #444;
+      border-radius: 7px;
+      padding: 13px;
+      background: #101010;
+      color: #eee;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    textarea:focus {
+      outline: 2px solid #607d9f;
+      outline-offset: 1px;
+      border-color: #607d9f;
+    }
+
+    #configInput {
+      min-height: 360px;
+    }
+
+    #idInput {
+      min-height: 110px;
+    }
+
+    #configOutput {
+      min-height: 360px;
+    }
+
+    .operation-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .operation-option {
+      display: block;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      background: #171717;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .operation-option:hover {
+      border-color: #777;
+      background: #202020;
+    }
+
+    .operation-option:has(input:checked) {
+      border-color: #7297c1;
+      background: #1c2a3a;
+    }
+
+    .operation-option input {
+      margin: 0 8px 0 0;
+      accent-color: #7297c1;
+    }
+
+    .operation-option strong {
+      font-size: 15px;
+    }
+
+    .operation-option span {
+      display: block;
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.4;
+      margin: 8px 0 0 24px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid #57769d;
+      border-radius: 7px;
+      padding: 11px 16px;
+      background: #355878;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    button:hover {
+      background: #416b91;
+      border-color: #81a6ce;
+    }
+
+    button.secondary {
+      background: #242424;
+      border-color: #555;
+    }
+
+    button.secondary:hover {
+      background: #303030;
+      border-color: #777;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      display: none;
+      margin: 16px 0 0;
+      border-radius: 7px;
+      padding: 12px 14px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .status.success {
+      display: block;
+      background: #17301d;
+      border: 1px solid #356c42;
+      color: #b7e9c0;
+    }
+
+    .status.error {
+      display: block;
+      background: #381b1b;
+      border: 1px solid #7b3939;
+      color: #ffc1c1;
+    }
+
+    .status.info {
+      display: block;
+      background: #192b3d;
+      border: 1px solid #3a638c;
+      color: #c7e1fa;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .result-header h2 {
+      margin: 0;
+    }
+
+    .result-header button {
+      white-space: nowrap;
+    }
+
+    footer {
+      text-align: center;
+      color: #777;
+      padding: 24px 20px;
+      border-top: 1px solid #222;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+      main {
+        width: min(100% - 24px, 1200px);
+        margin-top: 20px;
+      }
+
+      header {
+        padding: 22px 16px;
+      }
+
+      header h1 {
+        font-size: 26px;
+      }
+
+      .panel,
+      .intro {
+        padding: 16px;
+      }
+
+      .operation-list {
+        grid-template-columns: 1fr;
+      }
+
+      .result-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .result-header button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>RCON Chat Commands Update IDs</h1>
+    <p>Update player IDs in your Hell Let Loose RCON chat command configuration.</p>
+    <a class="back-link" href="../">← Back to Guides</a>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h2>How it works</h2>
+      <p>
+        Paste your complete RCON Chat Commands JSON configuration, choose what to do,
+        then enter the player IDs you want to use.
+      </p>
+      <p>
+        This tool updates every matching
+        <code>conditions.player_id.player_ids</code> list in the configuration.
+      </p>
+      <p class="privacy-note">
+        Your configuration is processed entirely in your browser. Nothing is uploaded or stored.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>1. Paste your current configuration</h2>
+      <label for="configInput">RCON Chat Commands Settings JSON</label>
+      <textarea
+        id="configInput"
+        spellcheck="false"
+        placeholder='Paste your complete JSON config here, starting with { ... }'
+      ></textarea>
+    </section>
+
+    <section class="panel">
+      <h2>2. Choose an update type</h2>
+
+      <div class="operation-list">
+        <label class="operation-option">
+          <input type="radio" name="operation" value="add" checked>
+          <strong>Add IDs</strong>
+          <span>Add the entered IDs to each existing player ID condition. Existing IDs stay in place.</span>
+        </label>
+
+        <label class="operation-option">
+          <input type="radio" name="operation" value="replace">
+          <strong>Replace IDs</strong>
+          <span>Replace every existing player ID condition list with the entered IDs.</span>
+        </label>
+
+        <label class="operation-option">
+          <input type="radio" name="operation" value="remove">
+          <strong>Remove IDs</strong>
+          <span>Remove the entered IDs from each existing player ID condition list.</span>
+        </label>
+      </div>
+
+      <label for="idInput">Player IDs to use</label>
+      <p class="help-text">
+        Enter one ID per line, or separate IDs with commas or spaces. Duplicate entries are ignored.
+      </p>
+      <textarea
+        id="idInput"
+        spellcheck="false"
+        placeholder="76561198012345678&#10;76561198087654321"
+      ></textarea>
+
+      <div class="actions">
+        <button id="updateButton" type="button">Update Configuration</button>
+        <button id="clearButton" class="secondary" type="button">Clear All</button>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div class="result-header">
+        <h2>3. Updated configuration</h2>
+        <button id="copyButton" class="secondary" type="button" disabled>Copy Updated Config</button>
+      </div>
+
+      <textarea
+        id="configOutput"
+        spellcheck="false"
+        readonly
+        placeholder="Your updated JSON configuration will appear here."
+      ></textarea>
+    </section>
+  </main>
+
+  <footer>guidesbyerich.fyi</footer>
+
+  <script>
+    const configInput = document.getElementById("configInput");
+    const idInput = document.getElementById("idInput");
+    const updateButton = document.getElementById("updateButton");
+    const clearButton = document.getElementById("clearButton");
+    const copyButton = document.getElementById("copyButton");
+    const configOutput = document.getElementById("configOutput");
+    const status = document.getElementById("status");
+
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = "status " + type;
+    }
+
+    function clearStatus() {
+      status.textContent = "";
+      status.className = "status";
+    }
+
+    function getSelectedOperation() {
+      return document.querySelector('input[name="operation"]:checked').value;
+    }
+
+    function parseIds(value) {
+    const ids = value
+        .split(/[\s,]+/)
+        .map(id => id.replace(/[^a-zA-Z0-9]/g, ""))
+        .filter(Boolean);
+
+    return [...new Set(ids)];
+    }
+
+    function normalizeIdInput() {
+    const cleanedIds = parseIds(idInput.value);
+
+    // Show the cleaned IDs back to the user, one ID per line.
+    idInput.value = cleanedIds.join("\n");
+
+    return cleanedIds;
+    }
+
+    function findPlayerIdLists(value, results = []) {
+      if (!value || typeof value !== "object") {
+        return results;
+      }
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          findPlayerIdLists(item, results);
+        }
+        return results;
+      }
+
+      /*
+        Match only this structure:
+
+        "conditions": {
+          "player_id": {
+            "player_ids": [ ... ]
+          }
+        }
+      */
+      if (
+        value.conditions &&
+        typeof value.conditions === "object" &&
+        !Array.isArray(value.conditions) &&
+        value.conditions.player_id &&
+        typeof value.conditions.player_id === "object" &&
+        !Array.isArray(value.conditions.player_id) &&
+        Array.isArray(value.conditions.player_id.player_ids)
+      ) {
+        results.push(value.conditions.player_id.player_ids);
+      }
+
+      for (const key of Object.keys(value)) {
+        if (key !== "conditions") {
+          findPlayerIdLists(value[key], results);
+        }
+      }
+
+      return results;
+    }
+
+    function updateConfig() {
+      clearStatus();
+      configOutput.value = "";
+      copyButton.disabled = true;
+
+      const rawConfig = configInput.value.trim();
+      const ids = normalizeIdInput();
+      const operation = getSelectedOperation();
+
+      if (!rawConfig) {
+        showStatus("Paste your current JSON configuration before updating it.", "error");
+        return;
+      }
+
+      if (!ids.length) {
+        showStatus("Enter at least one player ID to add, replace, or remove.", "error");
+        return;
+      }
+
+      let config;
+
+      try {
+        config = JSON.parse(rawConfig);
+      } catch (error) {
+        showStatus(
+          "The configuration is not valid JSON. Check for missing commas, quotes, brackets, or braces.",
+          "error"
+        );
+        return;
+      }
+
+      const playerIdLists = findPlayerIdLists(config);
+
+      if (!playerIdLists.length) {
+        showStatus(
+          'No "conditions.player_id.player_ids" lists were found in this configuration. No changes were made.',
+          "error"
+        );
+        return;
+      }
+
+      let changedLists = 0;
+      const idsToUse = new Set(ids);
+
+      for (const list of playerIdLists) {
+        const original = JSON.stringify(list);
+        let updatedList;
+
+        if (operation === "add") {
+          const existingIds = list.map(String);
+          updatedList = [...new Set([...existingIds, ...ids])];
+        } else if (operation === "replace") {
+          updatedList = [...ids];
+        } else {
+          updatedList = list.map(String).filter(id => !idsToUse.has(id));
+        }
+
+        list.splice(0, list.length, ...updatedList);
+
+        if (JSON.stringify(list) !== original) {
+          changedLists++;
+        }
+      }
+
+      configOutput.value = JSON.stringify(config, null, 2);
+      copyButton.disabled = false;
+
+      const operationText = {
+        add: "added to",
+        replace: "used to replace IDs in",
+        remove: "removed from"
+      };
+
+      showStatus(
+        `${ids.length} unique ID${ids.length === 1 ? "" : "s"} ${operationText[operation]} ` +
+        `${playerIdLists.length} player ID condition${playerIdLists.length === 1 ? "" : "s"}. ` +
+        `${changedLists} condition${changedLists === 1 ? "" : "s"} changed.`,
+        "success"
+      );
+    }
+
+    async function copyUpdatedConfig() {
+      if (!configOutput.value) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(configOutput.value);
+        showStatus("Updated configuration copied to your clipboard.", "success");
+      } catch (error) {
+        configOutput.focus();
+        configOutput.select();
+        document.execCommand("copy");
+        showStatus("Updated configuration copied to your clipboard.", "success");
+      }
+    }
+
+    function clearAll() {
+      configInput.value = "";
+      idInput.value = "";
+      configOutput.value = "";
+      copyButton.disabled = true;
+      clearStatus();
+      configInput.focus();
+    }
+
+    updateButton.addEventListener("click", updateConfig);
+    copyButton.addEventListener("click", copyUpdatedConfig);
+    clearButton.addEventListener("click", clearAll);
+    idInput.addEventListener("change", normalizeIdInput);
+  </script>
+</body>
+</html>
