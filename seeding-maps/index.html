@@ -47,7 +47,7 @@
     .popup-note {
       margin-top: 6px;
       font-size: 13px;
-      color: #000000;
+      color: #000;
     }
 
     .control-panel {
@@ -95,6 +95,11 @@
 
     .home-link:hover {
       background: rgba(45, 45, 45, 0.95);
+    }
+
+    /* Helps communicate that map markers are interactive. */
+    .leaflet-marker-icon {
+      cursor: pointer;
     }
   </style>
 </head>
@@ -144,6 +149,13 @@
 
   const GARRISON_ICON_SIZE = 32;
   const OP_ICON_SIZE = 28;
+
+  /*
+    How long a hover preview remains visible after the pointer leaves
+    the marker or popup. This gives the popup a smoother feel and makes
+    it possible to move the mouse from a marker onto its preview.
+  */
+  const HOVER_CLOSE_DELAY = 250;
 
   const icons = {
     blueGarrison: L.icon({
@@ -432,6 +444,7 @@
   let currentImageLayer = null;
   let currentMapKey = null;
   const markerLayers = [];
+  const preloadedMapImages = new Set();
 
   function getIcon(markerData) {
     if (markerData.team === 'blue' && markerData.type === 'garrison') {
@@ -459,8 +472,72 @@
     `;
   }
 
+  /*
+    Preloads all screenshot previews for the selected map only.
+    Once loaded, the browser cache makes hover/click previews display
+    without the initial image-loading delay.
+  */
+  function preloadMapScreenshots(mapKey) {
+    if (preloadedMapImages.has(mapKey)) {
+      return;
+    }
+
+    const selectedMap = mapConfigs[mapKey];
+
+    selectedMap.markers.forEach(markerData => {
+      const image = new Image();
+      image.src = markerData.image;
+    });
+
+    preloadedMapImages.add(mapKey);
+  }
+
+  function clearHoverCloseTimer(marker) {
+    if (marker.hoverCloseTimer) {
+      clearTimeout(marker.hoverCloseTimer);
+      marker.hoverCloseTimer = null;
+    }
+  }
+
+  function scheduleHoverPopupClose(marker) {
+    clearHoverCloseTimer(marker);
+
+    /*
+      A clicked popup remains open until the user clicks elsewhere,
+      matching normal Leaflet/mobile behavior.
+    */
+    if (marker.popupPinned) {
+      return;
+    }
+
+    marker.hoverCloseTimer = setTimeout(() => {
+      if (!marker.popupPinned && map.hasLayer(marker)) {
+        marker.closePopup();
+      }
+    }, HOVER_CLOSE_DELAY);
+  }
+
+  function addPopupHoverHandlers(marker) {
+    const popupElement = marker.getPopup().getElement();
+
+    if (!popupElement || popupElement.dataset.hoverHandlersAdded) {
+      return;
+    }
+
+    popupElement.dataset.hoverHandlersAdded = 'true';
+
+    popupElement.addEventListener('mouseenter', () => {
+      clearHoverCloseTimer(marker);
+    });
+
+    popupElement.addEventListener('mouseleave', () => {
+      scheduleHoverPopupClose(marker);
+    });
+  }
+
   function clearMarkers() {
     markerLayers.forEach(marker => {
+      clearHoverCloseTimer(marker);
       map.removeLayer(marker);
     });
 
@@ -472,10 +549,51 @@
 
     selectedMap.markers.forEach(data => {
       const marker = L.marker([data.y, data.x], {
-        icon: getIcon(data)
-      }).bindPopup(createPopup(data));
+        icon: getIcon(data),
+        riseOnHover: true
+      }).bindPopup(createPopup(data), {
+        closeButton: true,
+        autoPan: true
+      });
 
       marker.data = data;
+      marker.popupPinned = false;
+      marker.hoverCloseTimer = null;
+
+      /*
+        Desktop behavior:
+        Hovering opens a temporary preview. Moving away closes it after
+        a very short delay, allowing travel between the icon and popup.
+      */
+      marker.on('mouseover', () => {
+        clearHoverCloseTimer(marker);
+        marker.openPopup();
+      });
+
+      marker.on('mouseout', () => {
+        scheduleHoverPopupClose(marker);
+      });
+
+      /*
+        Click/tap behavior:
+        Clicking keeps the popup open, as before. This also provides the
+        expected behavior on touch devices that do not support hover.
+      */
+      marker.on('click', () => {
+        clearHoverCloseTimer(marker);
+        marker.popupPinned = true;
+        marker.openPopup();
+      });
+
+      marker.on('popupopen', () => {
+        addPopupHoverHandlers(marker);
+      });
+
+      marker.on('popupclose', () => {
+        clearHoverCloseTimer(marker);
+        marker.popupPinned = false;
+      });
+
       marker.addTo(map);
       markerLayers.push(marker);
     });
@@ -489,7 +607,6 @@
     currentMapKey = mapKey;
 
     map.closePopup();
-
     clearMarkers();
 
     if (currentImageLayer) {
@@ -504,6 +621,12 @@
     currentImageLayer = L.imageOverlay(selectedMap.image, bounds).addTo(map);
 
     map.fitBounds(bounds);
+
+    /*
+      Begin preloading immediately when this map is selected, before a
+      user hovers over or taps a marker.
+    */
+    preloadMapScreenshots(mapKey);
 
     addMarkersForMap(mapKey);
   }
@@ -527,6 +650,8 @@
       if (visible) {
         marker.addTo(map);
       } else {
+        clearHoverCloseTimer(marker);
+        marker.closePopup();
         map.removeLayer(marker);
       }
     });
@@ -554,10 +679,10 @@
 
   populateMapSelect();
 
-    // Default map loaded when the page opens.
+  // Default map loaded when the page opens.
   loadMap('carentan');
 
-    // Click to get the x/y coordinate.
+  // Click to get the x/y coordinate disabled unless debugging
   /*
   map.on('click', function(e) {
     const y = Math.round(e.latlng.lat);
